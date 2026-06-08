@@ -1,0 +1,23 @@
+{
+  "name": "syntara",
+  "version": "1.0.0",
+  "description": "Herramienta interna de CLI para proyectos SyntaraBiz",
+  "main": "bin/syntara.js",
+  "type": "module",
+  "bin": {
+    "syntara": "./bin/syntara.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "syntara",
+    "cli"
+  ],
+  "author": "SyntaraBiz",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^15.0.0",
+    "sharp": "^0.34.5"
+  }
+}
