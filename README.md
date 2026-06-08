@@ -8,7 +8,7 @@ Al ser este un repositorio público, no necesitas instalar nada localmente ni li
 
 Ejemplo de uso directo en un comando de build:
 ```bash
-npx --yes github:309948/syntara-cli sitemap -d https://midominio.com -o public/sitemap.xml
+npx --yes github:SyntaraBiz/syntara-cli sitemap -d https://midominio.com -o public/sitemap.xml
 ```
 *(El flag `--yes` evita que npx pregunte si deseas instalar el paquete temporalmente).*
 
@@ -20,7 +20,7 @@ npx --yes github:309948/syntara-cli sitemap -d https://midominio.com -o public/s
 Genera un archivo `sitemap.xml` combinando rutas estáticas y rutas dinámicas (extraídas de un archivo local mediante expresiones regulares).
 
 ```bash
-npx --yes github:309948/syntara-cli sitemap -d https://midominio.com -o public/sitemap.xml
+npx --yes github:SyntaraBiz/syntara-cli sitemap -d https://midominio.com -o public/sitemap.xml
 ```
 
 **Opciones:**
@@ -33,7 +33,7 @@ npx --yes github:309948/syntara-cli sitemap -d https://midominio.com -o public/s
 A partir de una sola imagen de alta resolución, genera automáticamente los tamaños requeridos para PWA (192x192 y 512x512).
 
 ```bash
-npx --yes github:309948/syntara-cli pwa-icons -s src/assets/logo-hq.png -o public/icons
+npx --yes github:SyntaraBiz/syntara-cli pwa-icons -s src/assets/logo-hq.png -o public/icons
 ```
 
 **Opciones:**
@@ -44,7 +44,7 @@ npx --yes github:309948/syntara-cli pwa-icons -s src/assets/logo-hq.png -o publi
 Busca recursivamente imágenes en formato PNG, JPG o JPEG en un directorio y las convierte a formato WebP optimizado, eliminando las originales (omite archivos que contengan "link_preview").
 
 ```bash
-npx --yes github:309948/syntara-cli optimize-images -d public/images -q 85
+npx --yes github:SyntaraBiz/syntara-cli optimize-images -d public/images -q 85
 ```
 
 **Opciones:**
@@ -101,4 +101,4 @@ syntara-cli/
    ```
 
 4. **Sube los cambios a GitHub:** 
-   Una vez listo, simplemente haz commit y push a la rama `main`. Cualquier proyecto que use el comando mediante `npx github:309948/syntara-cli` descargará la última versión automáticamente.
+   Una vez listo, simplemente haz commit y push a la rama `main`. Cualquier proyecto que use el comando mediante `npx github:SyntaraBiz/syntara-cli` descargará la última versión automáticamente.
