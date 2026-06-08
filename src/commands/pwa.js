@@ -31,7 +31,15 @@ export function generatePwaIconsCommand(program) {
             .toFile(outputPath);
           console.log(`✅ Generado ${outputPath}`);
         }
-        console.log('🎉 Íconos PWA generados exitosamente.');
+        
+        // Generar imagen para link preview (Open Graph / Twitter Card)
+        const previewPath = path.join(outDir, 'link_preview.png');
+        await sharp(sourcePath)
+          .resize(1200, 630, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
+          .toFile(previewPath);
+        console.log(`✅ Generado ${previewPath}`);
+
+        console.log('🎉 Íconos PWA y Link Preview generados exitosamente.');
       } catch (err) {
         console.error('❌ Error generando íconos PWA:', err);
       }
