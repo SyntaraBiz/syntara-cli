@@ -21,7 +21,7 @@ export function generateSitemapCommand(program) {
         if (fs.existsSync(filePath)) {
           const content = fs.readFileSync(filePath, 'utf-8');
           // Extracción genérica de IDs
-          const regex = /id:\s*"([^"]+)"/g;
+          const regex = /id:\s*['"]([^'"]+)['"]/g;
           let match;
           while ((match = regex.exec(content)) !== null) {
             dynamicIds.push(match[1]);
