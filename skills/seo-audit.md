@@ -1,55 +1,50 @@
 # Skill: SEO Audit
 
-## Description
-Audita el SEO de un sitio web o proyecto, generando un reporte con issues priorizados
-y acciones correctivas concretas.
-
-## Trigger
-"auditar SEO", "revisar SEO", "SEO audit", "analizar SEO"
+Trigger: "auditar SEO", "revisar SEO", "SEO audit", "check SEO"
 
 ## Workflow
 
-### 1. Si es un sitio ya desplegado
+1. **Identificar el objetivo**:
+   - URL del sitio web o archivo HTML local
+   - Si no se especifica, preguntar al usuario
+
+2. **Ejecutar audit**:
+   ```bash
+   npx --yes github:SyntaraBiz/syntara-cli seo-audit -d <URL> -o report.json
+   ```
+
+3. **Analizar reporte**:
+   - Priorizar errores → warnings → infos
+   - Score general (0-100)
+   - Issues por categoría: meta, headings, a11y, social, structured-data
+
+4. **Aplicar fixes**:
+   - Meta tags: title, description, viewport, canonical
+   - Headings: h1 único, jerarquía correcta
+   - Imágenes: alt text descriptivo
+   - Social: Open Graph, Twitter Cards
+   - Structured data: JSON-LD
+
+5. **Verificar**:
+   - Re-ejecutar audit para confirmar mejoras
+   - Score debería subir > 90 para considerar "good"
+
+## Comandos útiles
+
 ```bash
-syntara seo-audit -d https://dominio.com -o seo-report.json
+# Audit completo
+npx --yes github:SyntaraBiz/syntara-cli seo-audit -d https://example.com -o report.json
+
+# Generar structured data para mejorar SEO
+npx --yes github:SyntaraBiz/syntara-cli generate-structured-data -t Organization -o src/data/org.json -d '{"name":"Mi Empresa","url":"https://example.com"}'
+
+# Generar sitemap
+npx --yes github:SyntaraBiz/syntara-cli sitemap -d https://example.com -o public/sitemap.xml
 ```
 
-### 2. Si es un proyecto local (post-build)
-```bash
-syntara seo-audit -d dist/index.html -o seo-report.json
-```
+## Criterios de calidad
 
-### 3. Revisar el reporte
-Revisar el JSON y priorizar por severidad:
-- **ERROR**: Críticos — arreglar inmediatamente (missing title, h1, lang)
-- **WARN**: Importantes — arreglar pronto (title length, meta description, alt text)
-- **INFO**: Recomendaciones — considerar (canonical, structured data)
-
-### 4. Por categoría de issue, aplicar correcciones:
-
-#### Meta Tags
-- `<title>`: 50-60 caracteres, único por página, incluye keyword principal
-- `<meta name="description">`: 120-158 caracteres, llamada a la acción
-- `<meta name="viewport">`: `width=device-width, initial-scale=1`
-- `<link rel="canonical">`: URL canónica consistente (con o sin trailing slash)
-
-#### Headings
-- Exactamente un `<h1>` por página
-- Jerarquía sin saltos: h1 → h2 → h3
-- Los headings deben ser descriptivos, no genéricos
-
-#### Imágenes
-- `alt` en todas las imágenes (descriptivo, incluye keyword si es natural)
-- Formato moderno: WebP o AVIF
-- `width` y `height` explícitos para evitar CLS
-
-#### Structured Data
-- Minimum: `Organization` o `WebSite` en la home
-- `BreadcrumbList` en todas las páginas internas
-- `Article` / `BlogPosting` en posts
-- `Product` en páginas de producto
-
-### 5. Re-ejecutar la auditoría para verificar
-```bash
-syntara seo-audit -d https://dominio.com -o seo-report-final.json
-```
+- Score > 90: Excelente
+- Score 70-90: Bueno, mejoras menores
+- Score 50-70: Necesita mejoras
+- Score < 50: Crítico, requiere intervención inmediata

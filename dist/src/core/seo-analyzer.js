@@ -94,13 +94,61 @@ export function analyzeHTML(html, url) {
             suggestion: "Add <meta name='viewport' content='width=device-width, initial-scale=1'>",
         });
     }
-    const hasLang = /<html[^>]*lang=/.test(html);
+    const hasLang = /<html[^>]*\blang\b/.test(html);
     if (!hasLang) {
         issues.push({
             type: "error",
             category: "a11y",
             message: "Missing lang attribute on <html>",
             suggestion: "Add lang='es' (or appropriate language) to <html>",
+        });
+    }
+    // Heading hierarchy check
+    const headingLevels = extractHeadingLevels(html);
+    if (headingLevels.length > 0) {
+        let prevLevel = 0;
+        for (const level of headingLevels) {
+            if (level > prevLevel + 1) {
+                issues.push({
+                    type: "warn",
+                    category: "headings",
+                    message: `Heading hierarchy skip: h${prevLevel} → h${level}`,
+                    suggestion: `Ensure heading levels are sequential (e.g., h${prevLevel} → h${prevLevel + 1})`,
+                });
+            }
+            prevLevel = level;
+        }
+    }
+    // Open Graph tags check
+    const ogTags = ["og:title", "og:description", "og:image", "og:url"];
+    const missingOg = ogTags.filter((tag) => !html.includes(`property="${tag}"`));
+    if (missingOg.length > 0 && missingOg.length < 4) {
+        issues.push({
+            type: "info",
+            category: "social",
+            message: `Missing Open Graph tags: ${missingOg.join(", ")}`,
+            suggestion: "Add Open Graph meta tags for better social sharing",
+        });
+    }
+    // Twitter Card tags check
+    const twitterTags = ["twitter:card", "twitter:title", "twitter:description"];
+    const missingTwitter = twitterTags.filter((tag) => !html.includes(`name="${tag}"`));
+    if (missingTwitter.length > 0 && missingTwitter.length < 3) {
+        issues.push({
+            type: "info",
+            category: "social",
+            message: `Missing Twitter Card tags: ${missingTwitter.join(", ")}`,
+            suggestion: "Add Twitter Card meta tags for better Twitter sharing",
+        });
+    }
+    // Structured data check
+    const hasStructuredData = html.includes('application/ld+json');
+    if (!hasStructuredData) {
+        issues.push({
+            type: "info",
+            category: "structured-data",
+            message: "No structured data (JSON-LD) found",
+            suggestion: "Add JSON-LD structured data for better search visibility",
         });
     }
     const errors = issues.filter((i) => i.type === "error").length;
@@ -140,5 +188,17 @@ function countTag(html, tag) {
 function extractTags(html, tag) {
     const matches = html.match(new RegExp(`<${tag}[^>]*>`, "gi"));
     return matches ?? [];
+}
+function extractHeadingLevels(html) {
+    const levels = [];
+    const matches = html.match(/<h([1-6])[^>]*>/gi);
+    if (matches) {
+        for (const match of matches) {
+            const level = parseInt(match.match(/h([1-6])/i)?.[1] ?? "0", 10);
+            if (level > 0)
+                levels.push(level);
+        }
+    }
+    return levels;
 }
 //# sourceMappingURL=seo-analyzer.js.map

@@ -15,6 +15,7 @@ import {
   buildSitemapEntries,
   generateSitemapXML,
 } from "../core/sitemap-core.js";
+import { optimizeDirectory } from "../core/image-pipeline.js";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -246,6 +247,36 @@ tools.set("generate_cloudflare_config", {
           type: "text",
           text: `Cloudflare config generated at ${outDir}/ [${files.join(", ")}]`,
         },
+      ],
+    };
+  },
+});
+
+tools.set("optimize_images", {
+  description: "Optimiza imagenes PNG/JPG a WebP en un directorio",
+  inputSchema: {
+    type: "object",
+    properties: {
+      dir: { type: "string", description: "Directorio de imagenes" },
+      quality: { type: "number", description: "Calidad 1-100", default: 80 },
+    },
+    required: ["dir"],
+  },
+  handler: async (params) => {
+    const dir = params.dir as string;
+    const quality = (params.quality as number) ?? 80;
+    const targetDir = path.resolve(process.cwd(), dir);
+
+    if (!fs.existsSync(targetDir)) {
+      return {
+        content: [{ type: "text", text: `Error: Directory not found: ${targetDir}` }],
+      };
+    }
+
+    const count = await optimizeDirectory(targetDir, "webp", quality);
+    return {
+      content: [
+        { type: "text", text: `Optimized ${count} images to WebP (quality: ${quality})` },
       ],
     };
   },
