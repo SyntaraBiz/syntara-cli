@@ -45,7 +45,7 @@ export function generateCloudflareConfig(options) {
     }
     if (options.noIndexPreview) {
         headers += `# Prevent search indexing on preview URLs
-https://:project.pages.dev/*
+https://*.pages.dev/*
   X-Robots-Tag: noindex
 
 `;

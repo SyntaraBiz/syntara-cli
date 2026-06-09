@@ -94,7 +94,10 @@ export function analyzeHTML(html: string, url: string): SEOReport {
   }
 
   const images = extractTags(html, "img");
-  const imagesWithoutAlt = images.filter((img) => !img.includes("alt="));
+  const imagesWithoutAlt = images.filter((img) => {
+    const altMatch = img.match(/alt\s*=\s*["']([^"']*)["']/i);
+    return !altMatch || altMatch[1].trim() === "";
+  });
   if (imagesWithoutAlt.length > 0) {
     issues.push({
       type: "warn",
@@ -129,11 +132,14 @@ export function analyzeHTML(html: string, url: string): SEOReport {
   const warnings = issues.filter((i) => i.type === "warn").length;
   const infos = issues.filter((i) => i.type === "info").length;
   const total = errors + warnings + infos;
-  const score = total > 0
-    ? Math.round(
-        ((errors * 0 + warnings * 50 + infos * 75) / (total * 100)) * 100,
-      )
-    : 100;
+
+  // Score: 100 base, minus penalties per severity
+  let score = 100;
+  score -= errors * 15;
+  score -= warnings * 5;
+  score -= infos * 2;
+  if (total === 0) score = 100;
+  score = Math.max(0, Math.min(100, score));
 
   return {
     url,

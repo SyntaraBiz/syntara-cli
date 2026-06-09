@@ -80,9 +80,26 @@ describe("sitemap-core", () => {
         compression: false,
       });
 
-      // Map deduplication by route
+      expect(entries).toHaveLength(2);
       const urls = entries.map((e) => e.loc);
       expect(new Set(urls).size).toBe(2);
+    });
+
+    it("generates multiple dynamic URLs from IDs", () => {
+      const entries = buildSitemapEntries({
+        domain: "https://example.com",
+        staticRoutes: [],
+        dynamicPatterns: [
+          { pattern: "/producto/{id}" },
+        ],
+        defaultChangefreq: "weekly",
+        defaultPriority: "0.8",
+        rootPriority: "1.0",
+        compression: false,
+      });
+
+      // No IDs provided, no dynamic URLs generated
+      expect(entries).toHaveLength(0);
     });
   });
 

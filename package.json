@@ -1,6 +1,6 @@
 {
   "name": "syntara",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Herramienta interna de CLI para proyectos SyntaraBiz",
   "main": "bin/syntara.js",
   "type": "module",
@@ -27,10 +27,8 @@
   "author": "SyntaraBiz",
   "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "commander": "^15.0.0",
-    "sharp": "^0.34.5",
-    "zod": "^4.4.3"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^25.9.2",

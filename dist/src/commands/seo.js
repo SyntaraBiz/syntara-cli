@@ -15,6 +15,10 @@ export function registerSeoCommands(program) {
         if (domain.startsWith("http")) {
             try {
                 const response = await fetch(domain);
+                if (!response.ok) {
+                    console.error(`Failed to fetch URL: ${domain} (status ${response.status})`);
+                    return;
+                }
                 html = await response.text();
             }
             catch {
@@ -58,17 +62,26 @@ export function registerSeoCommands(program) {
         .option("-d, --data <json>", "Datos en formato JSON")
         .action((options) => {
         const { type, out, data } = options;
-        const parsedData = data ? JSON.parse(data) : {};
+        let parsedData = {};
+        if (data) {
+            try {
+                parsedData = JSON.parse(data);
+            }
+            catch {
+                console.error("Invalid JSON in --data option");
+                return;
+            }
+        }
         let result;
         switch (type) {
             case "Organization":
-                result = generateOrganizationSD(parsedData.name ?? "My Organization", parsedData.url ?? "");
+                result = generateOrganizationSD(String(parsedData.name ?? "My Organization"), String(parsedData.url ?? ""));
                 break;
             case "BreadcrumbList":
                 result = generateBreadcrumbSD(parsedData.items ?? []);
                 break;
             case "WebSite":
-                result = generateWebSiteSD(parsedData.name ?? "My Site", parsedData.url ?? "");
+                result = generateWebSiteSD(String(parsedData.name ?? "My Site"), String(parsedData.url ?? ""));
                 break;
             case "FAQPage":
                 result = generateFAQSD(parsedData.questions ?? []);
@@ -97,13 +110,21 @@ export function registerSeoCommands(program) {
         .option("--no-security", "Deshabilitar security headers")
         .option("-r, --redirects <json>", "Redirects en formato JSON")
         .action((options) => {
+        let redirects;
+        if (options.redirects) {
+            try {
+                redirects = JSON.parse(options.redirects);
+            }
+            catch {
+                console.error("Invalid JSON in --redirects option");
+                return;
+            }
+        }
         const config = generateCloudflareConfig({
             domain: options.domain,
             cacheHeaders: options.cache ?? true,
             securityHeaders: options.security ?? true,
-            redirects: options.redirects
-                ? JSON.parse(options.redirects)
-                : undefined,
+            redirects,
         });
         const outDir = path.resolve(process.cwd(), options.out);
         fs.mkdirSync(outDir, { recursive: true });

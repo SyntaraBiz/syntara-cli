@@ -221,6 +221,7 @@ export async function optimizeDirectory(
 
 export function updateCodeImports(
   codeDir: string,
+  format: ImageFormat = "webp",
 ): { updated: number; files: string[] } {
   const updatedFiles: string[] = [];
   const extensions = [".tsx", ".ts", ".jsx", ".js", ".vue", ".svelte", ".html", ".astro"];
@@ -244,9 +245,13 @@ export function updateCodeImports(
       let modified = false;
 
       for (const imgExt of IMAGE_EXTENSIONS) {
-        const dotExt = imgExt.replace(".", "\\.");
-        if (new RegExp(dotExt).test(content)) {
-          content = content.replace(new RegExp(dotExt, "g"), ".webp");
+        const ext = imgExt.replace(".", "");
+        // Only replace image paths inside quotes that are NOT external URLs
+        // Matches: "./logo.png", './img/logo.png', "/logo.png", etc.
+        // Skips: "https://example.com/img.png", "data-alt", etc.
+        const regex = new RegExp(`(['"](?:[^'"]*[^/])?)\\.${ext}(?![a-zA-Z0-9])`, "g");
+        if (regex.test(content)) {
+          content = content.replace(regex, `$1.${format}`);
           modified = true;
         }
       }

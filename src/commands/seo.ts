@@ -25,6 +25,10 @@ export function registerSeoCommands(program: Command): void {
       if (domain.startsWith("http")) {
         try {
           const response = await fetch(domain);
+          if (!response.ok) {
+            console.error(`Failed to fetch URL: ${domain} (status ${response.status})`);
+            return;
+          }
           html = await response.text();
         } catch {
           console.error(`Failed to fetch URL: ${domain}`);
@@ -74,33 +78,49 @@ export function registerSeoCommands(program: Command): void {
     .option("-d, --data <json>", "Datos en formato JSON")
     .action((options) => {
       const { type, out, data } = options;
-      const parsedData = data ? JSON.parse(data) : {};
+      let parsedData: Record<string, unknown> = {};
+      if (data) {
+        try {
+          parsedData = JSON.parse(data);
+        } catch {
+          console.error("Invalid JSON in --data option");
+          return;
+        }
+      }
 
       let result: string;
       switch (type) {
         case "Organization":
           result = generateOrganizationSD(
-            parsedData.name ?? "My Organization",
-            parsedData.url ?? "",
+            String(parsedData.name ?? "My Organization"),
+            String(parsedData.url ?? ""),
           );
           break;
         case "BreadcrumbList":
-          result = generateBreadcrumbSD(parsedData.items ?? []);
+          result = generateBreadcrumbSD(
+            (parsedData.items as { name: string; url: string }[]) ?? [],
+          );
           break;
         case "WebSite":
           result = generateWebSiteSD(
-            parsedData.name ?? "My Site",
-            parsedData.url ?? "",
+            String(parsedData.name ?? "My Site"),
+            String(parsedData.url ?? ""),
           );
           break;
         case "FAQPage":
-          result = generateFAQSD(parsedData.questions ?? []);
+          result = generateFAQSD(
+            (parsedData.questions as { question: string; answer: string }[]) ?? [],
+          );
           break;
         case "Product":
-          result = generateProductSD(parsedData);
+          result = generateProductSD(
+            parsedData as Parameters<typeof generateProductSD>[0],
+          );
           break;
         case "Article":
-          result = generateArticleSD(parsedData);
+          result = generateArticleSD(
+            parsedData as Parameters<typeof generateArticleSD>[0],
+          );
           break;
         default:
           console.error(`Unknown schema type: ${type}`);
@@ -122,13 +142,21 @@ export function registerSeoCommands(program: Command): void {
     .option("--no-security", "Deshabilitar security headers")
     .option("-r, --redirects <json>", "Redirects en formato JSON")
     .action((options) => {
+      let redirects: { from: string; to: string; status?: number }[] | undefined;
+      if (options.redirects) {
+        try {
+          redirects = JSON.parse(options.redirects);
+        } catch {
+          console.error("Invalid JSON in --redirects option");
+          return;
+        }
+      }
+
       const config = generateCloudflareConfig({
         domain: options.domain,
         cacheHeaders: options.cache ?? true,
         securityHeaders: options.security ?? true,
-        redirects: options.redirects
-          ? JSON.parse(options.redirects)
-          : undefined,
+        redirects,
       });
 
       const outDir = path.resolve(process.cwd(), options.out);

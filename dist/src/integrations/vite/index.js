@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { buildSitemapEntries, generateSitemapXML } from "../../core/sitemap-core.js";
+import { generateCloudflareConfig } from "../../core/cloudflare-config.js";
 export default function syntaraVite(options = {}) {
     const resolvedOptions = {
         sitemap: {
@@ -29,9 +30,6 @@ export default function syntaraVite(options = {}) {
     return {
         name: "syntara-vite",
         enforce: "post",
-        configResolved(_config) {
-            // No-op for now
-        },
         transformIndexHtml: {
             order: "post",
             handler(html) {
@@ -73,8 +71,24 @@ export default function syntaraVite(options = {}) {
             }
         },
         closeBundle() {
-            if (resolvedOptions.cloudflare.cacheHeaders) {
-                generateCloudflareConfig(resolvedOptions.cloudflare);
+            const cf = resolvedOptions.cloudflare;
+            if (cf.cacheHeaders || cf.securityHeaders || cf.redirects.length > 0 || cf.cspDirectives) {
+                const outputDir = path.resolve(process.cwd(), cf.outputDir);
+                const config = generateCloudflareConfig({
+                    domain: resolvedOptions.sitemap.domain || "https://example.com",
+                    cacheHeaders: cf.cacheHeaders,
+                    securityHeaders: cf.securityHeaders,
+                    cspDirectives: cf.cspDirectives,
+                    redirects: cf.redirects,
+                });
+                fs.mkdirSync(outputDir, { recursive: true });
+                if (config.headers) {
+                    fs.writeFileSync(path.join(outputDir, "_headers"), config.headers);
+                }
+                if (config.redirects) {
+                    fs.writeFileSync(path.join(outputDir, "_redirects"), config.redirects);
+                }
+                fs.writeFileSync(path.join(outputDir, "robots.txt"), config.robots);
             }
         },
     };
@@ -97,47 +111,5 @@ function injectSEOMeta(html, seo) {
         return html.replace("</head>", `${metaTags.join("\n")}\n</head>`);
     }
     return html;
-}
-function generateCloudflareConfig(options) {
-    const outputDir = path.resolve(process.cwd(), options.outputDir);
-    let headers = "";
-    if (options.cacheHeaders) {
-        headers += `# Assets inmutables (hasheados)
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# Fonts
-/fonts/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# HTML
-/*.html
-  Cache-Control: public, max-age=0, must-revalidate
-
-`;
-    }
-    if (options.securityHeaders) {
-        headers += `/*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-
-`;
-    }
-    if (headers) {
-        fs.mkdirSync(outputDir, { recursive: true });
-        fs.writeFileSync(path.join(outputDir, "_headers"), headers);
-    }
-    if (options.redirects.length > 0) {
-        const redirects = options.redirects
-            .map((r) => `${r.from} ${r.to} ${r.status ?? 301}`)
-            .join("\n");
-        fs.mkdirSync(outputDir, { recursive: true });
-        fs.writeFileSync(path.join(outputDir, "_redirects"), redirects);
-    }
-    const robots = "User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n";
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(path.join(outputDir, "robots.txt"), robots);
 }
 //# sourceMappingURL=index.js.map

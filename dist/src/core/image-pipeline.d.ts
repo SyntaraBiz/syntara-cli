@@ -33,7 +33,7 @@ export declare function generatePwaIcons(sourcePath: string, outputDir: string, 
 export declare function generateSrcSet(sourcePath: string, outputDir: string, format?: ImageFormat, sizes?: number[], quality?: number): Promise<SrcSetResult[]>;
 export declare function generateBlurPlaceholder(sourcePath: string): Promise<BlurPlaceholderResult>;
 export declare function optimizeDirectory(targetDir: string, format?: ImageFormat, quality?: number): Promise<number>;
-export declare function updateCodeImports(codeDir: string): {
+export declare function updateCodeImports(codeDir: string, format?: ImageFormat): {
     updated: number;
     files: string[];
 };

@@ -44,13 +44,6 @@ export default function syntara(options: SyntaraAstroOptions = {}): AstroIntegra
   return {
     name: "@syntara/astro",
     hooks: {
-      "astro:config:setup": ({ updateConfig }) => {
-        updateConfig({
-          vite: {
-            plugins: [],
-          },
-        });
-      },
       "astro:build:done": async (hookOptions) => {
         const { pages, dir, logger } = hookOptions;
 

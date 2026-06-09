@@ -20,6 +20,10 @@ export function generatePwaIconsCommand(program) {
             for (const result of results) {
                 console.log(`Generated ${result.path}`);
             }
+            const previewPath = path.join(outDir, "link_preview.png");
+            if (fs.existsSync(previewPath)) {
+                console.log(`Generated ${previewPath} (1200x630 link preview)`);
+            }
             console.log("PWA icons generated successfully.");
         }
         catch (err) {

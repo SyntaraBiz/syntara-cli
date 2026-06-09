@@ -5,7 +5,6 @@ import { generateCloudflareConfig } from "../core/cloudflare-config.js";
 import { buildSitemapEntries, generateSitemapXML, } from "../core/sitemap-core.js";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 const SERVER_NAME = "syntara-seo";
 const SERVER_VERSION = "2.0.0";
 const PROTOCOL_VERSION = "2025-11-25";
@@ -27,6 +26,13 @@ tools.set("audit_seo", {
         let html;
         if (url.startsWith("http")) {
             const response = await fetch(url);
+            if (!response.ok) {
+                return {
+                    content: [
+                        { type: "text", text: `Error: HTTP ${response.status} for ${url}` },
+                    ],
+                };
+            }
             html = await response.text();
         }
         else {

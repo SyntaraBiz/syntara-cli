@@ -17,6 +17,10 @@ export function optimizeImagesCommand(program: Command): void {
       const { dir, quality } = options;
       const targetDir = path.resolve(process.cwd(), dir);
       const q = parseInt(quality, 10);
+      if (isNaN(q) || q < 1 || q > 100) {
+        console.error(`Invalid quality: ${quality}. Must be between 1 and 100.`);
+        return;
+      }
 
       if (!fs.existsSync(targetDir)) {
         console.error(`Directory not found: ${targetDir}`);

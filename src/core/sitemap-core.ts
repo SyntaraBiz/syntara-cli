@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 export interface SitemapDynamicPattern {
   pattern: string;
   collection?: string;
@@ -66,6 +69,7 @@ export function generateSitemapXML(
 export function buildSitemapEntries(options: SitemapOptions): SitemapURLEntry[] {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const entries: SitemapURLEntry[] = [];
+  const domain = opts.domain.replace(/\/$/, "");
 
   const routes = new Map<string, { changefreq: string; priority: string }>();
 
@@ -79,17 +83,23 @@ export function buildSitemapEntries(options: SitemapOptions): SitemapURLEntry[] 
 
   for (const pattern of opts.dynamicPatterns) {
     const ids = extractDynamicIds(pattern);
-    const urlPath = buildDynamicUrlPath(pattern.pattern, ids);
-    routes.set(urlPath, {
-      changefreq: "monthly",
-      priority: "0.7",
-    });
+    // Generate one URL per ID, not one per pattern
+    const placeholders = (pattern.pattern.match(/[\[\{]\w+[\]\}]/g) ?? []).length;
+    const entriesPerId = placeholders > 0 ? placeholders : 1;
+    for (let i = 0; i < ids.length; i += entriesPerId) {
+      const chunk = ids.slice(i, i + entriesPerId);
+      const urlPath = buildDynamicUrlPath(pattern.pattern, chunk);
+      routes.set(urlPath, {
+        changefreq: "monthly",
+        priority: "0.7",
+      });
+    }
   }
 
   for (const [path, meta] of routes) {
     const urlPath = path === "/" ? "" : path;
     entries.push({
-      loc: `${opts.domain}${urlPath}`,
+      loc: `${domain}${urlPath}`,
       lastmod: opts.lastmod,
       changefreq: meta.changefreq,
       priority: meta.priority,
@@ -101,8 +111,6 @@ export function buildSitemapEntries(options: SitemapOptions): SitemapURLEntry[] 
 
 function extractDynamicIds(pattern: SitemapDynamicPattern): string[] {
   if (pattern.idRegex && pattern.source) {
-    const fs = require("node:fs");
-    const path = require("node:path");
     const filePath = path.resolve(process.cwd(), pattern.source);
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, "utf-8");
@@ -118,7 +126,7 @@ function extractDynamicIds(pattern: SitemapDynamicPattern): string[] {
 }
 
 function buildDynamicUrlPath(pattern: string, ids: string[]): string {
-  return pattern.replace(/\[(\w+)\]/g, () => ids.shift() ?? ":id");
+  return pattern.replace(/[\[\{](\w+)[\]\}]/g, () => ids.shift() ?? ":id");
 }
 
 function normalizeRoute(route: string): string {
