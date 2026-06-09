@@ -1,0 +1,1 @@
+{"version":3,"file":"cloudflare.d.ts","sourceRoot":"","sources":["../../../../src/integrations/astro/cloudflare.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,6BAA6B,EAAE,MAAM,YAAY,CAAC;AAChE,OAAO,KAAK,EAAE,oBAAoB,EAAE,MAAM,kBAAkB,CAAC;AAE7D,wBAAsB,oBAAoB,CACxC,UAAU,EAAE,oBAAoB,EAChC,OAAO,EAAE,6BAA6B,GACrC,OAAO,CAAC,IAAI,CAAC,CAkCf"}

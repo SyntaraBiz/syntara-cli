@@ -4,11 +4,21 @@
   "description": "Herramienta interna de CLI para proyectos SyntaraBiz",
   "main": "bin/syntara.js",
   "type": "module",
+  "exports": {
+    ".": "./bin/syntara.js",
+    "./astro": "./dist/integrations/astro/index.js",
+    "./vite": "./dist/integrations/vite/index.js",
+    "./core/*": "./dist/core/*.js"
+  },
   "bin": {
     "syntara": "./bin/syntara.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "tsc"
   },
   "keywords": [
     "syntara",
@@ -17,7 +27,15 @@
   "author": "SyntaraBiz",
   "license": "ISC",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "commander": "^15.0.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }
