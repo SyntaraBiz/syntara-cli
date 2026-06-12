@@ -104,10 +104,13 @@ GitHub Actions: `.github/workflows/ci.yml` — build + test en cada push.
 5. `pnpm build && pnpm test`
 6. Commit con `dist/` incluido
 
-## Gotchas
+## Gotchas y Buenas Prácticas (Astro + Cloudflare)
 
 1. `dist/` es commiteado (necesario para npx)
 2. Usar `pnpm` (no npm/yarn)
 3. TypeScript strict, ESM (`"type": "module"`)
 4. `bin/syntara.js` importa `../dist/src/cli.js`
 5. No publicar a npm
+6. **Case Sensitivity en Cloudflare (Linux):** Windows ignora mayúsculas/minúsculas en nombres de archivo (`Button.tsx` vs `button.tsx`), pero Cloudflare fallará al compilar. Usar `git mv` para forzar el renombrado correcto en Git si ocurre este problema.
+7. **Astro 5+ y SSR:** La opción `output: "hybrid"` fue eliminada en Astro 5. Ahora se usa `output: "static"` por defecto. Para que una ruta sea SSR (API o página dinámica), simplemente agregar `export const prerender = false;` en el archivo correspondiente.
+8. **Cloudflare Pages y 'ASSETS':** Al usar `@astrojs/cloudflare` en Pages, NO definir `build: { assets: 'assets' }` en `astro.config.mjs`, ya que entra en conflicto con el binding reservado `ASSETS` interno de Cloudflare Pages.
