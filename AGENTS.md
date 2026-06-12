@@ -113,4 +113,9 @@ GitHub Actions: `.github/workflows/ci.yml` — build + test en cada push.
 5. No publicar a npm
 6. **Case Sensitivity en Cloudflare (Linux):** Windows ignora mayúsculas/minúsculas en nombres de archivo (`Button.tsx` vs `button.tsx`), pero Cloudflare fallará al compilar. Usar `git mv` para forzar el renombrado correcto en Git si ocurre este problema.
 7. **Astro 5+ y SSR:** La opción `output: "hybrid"` fue eliminada en Astro 5. Ahora se usa `output: "static"` por defecto. Para que una ruta sea SSR (API o página dinámica), simplemente agregar `export const prerender = false;` en el archivo correspondiente.
-8. **Cloudflare Pages y 'ASSETS':** Al usar `@astrojs/cloudflare` en Pages, por defecto intenta habilitar el servicio de imágenes en Cloudflare, lo que genera un binding llamado `ASSETS` que choca con la palabra reservada de Pages. Solución: configurar explícitamente `adapter: cloudflare({ imageService: 'passthrough' })` en `astro.config.mjs`.
+8. **Cloudflare Pages vs Astro v6 (El bug del ASSETS):** Astro v6 genera por defecto un archivo `wrangler.json` que contiene un binding llamado `ASSETS`. Esta palabra está **estrictamente prohibida** en proyectos Cloudflare Pages y causará que el despliegue falle con "The name 'ASSETS' is reserved". Además, Astro genera `_worker.js/entry.mjs` pero Cloudflare Pages exige `_worker.js/index.js`.
+   **Solución defintiva:** Crear un script post-build (ej: `scripts/fix-cf.js`) que:
+   - Elimine `dist/_worker.js/wrangler.json` (para evadir el error ASSETS).
+   - Elimine `.wrangler/` (para evitar redirecciones al archivo eliminado).
+   - Renombre `dist/_worker.js/entry.mjs` a `index.js`.
+   Y usar en package.json: `"build": "astro build && node scripts/fix-cf.js"`. No basta con cambiar `imageService` a 'passthrough'.
